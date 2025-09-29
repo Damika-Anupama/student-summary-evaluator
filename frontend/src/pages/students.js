@@ -17,8 +17,6 @@ import { Layout as DashboardLayout } from "src/layouts/dashboard/layout";
 import { StudentsTable } from "src/sections/student/students-table";
 import { StudentsSearch } from "src/sections/student/students-search";
 import { applyPagination } from "src/utils/apply-pagination";
-import { clerkClient } from "@clerk/nextjs";
-import prisma from "../lib/prisma";
 
 const now = new Date();
 
@@ -294,8 +292,54 @@ const Page = (props) => {
 Page.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
 
 export const getStaticProps = async () => {
-	const students = await prisma.eval_students.findMany();
-	console.log(students);
+	// Dummy students data
+	const students = [
+		{
+			id: 1,
+			firstName: "John",
+			lastName: "Doe",
+			email: "john.doe@example.com",
+			contactNo: "1234567890",
+			address: "123 Main St",
+			createdAt: new Date("2025-01-15"),
+		},
+		{
+			id: 2,
+			firstName: "Jane",
+			lastName: "Smith",
+			email: "jane.smith@example.com",
+			contactNo: "0987654321",
+			address: "456 Oak Ave",
+			createdAt: new Date("2025-01-20"),
+		},
+		{
+			id: 3,
+			firstName: "Mike",
+			lastName: "Johnson",
+			email: "mike.johnson@example.com",
+			contactNo: "5551234567",
+			address: "789 Pine Rd",
+			createdAt: new Date("2025-02-01"),
+		},
+		{
+			id: 4,
+			firstName: "Emily",
+			lastName: "Davis",
+			email: "emily.davis@example.com",
+			contactNo: "5559876543",
+			address: "321 Elm St",
+			createdAt: new Date("2025-02-10"),
+		},
+		{
+			id: 5,
+			firstName: "Sarah",
+			lastName: "Wilson",
+			email: "sarah.wilson@example.com",
+			contactNo: "5555555555",
+			address: "654 Maple Dr",
+			createdAt: new Date("2025-02-15"),
+		},
+	];
 
 	return {
 		props: {

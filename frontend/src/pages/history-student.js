@@ -16,8 +16,6 @@ import { useSelection } from "src/hooks/use-selection";
 import { Layout as DashboardLayout } from "src/layouts/dashboard/layout";
 import { PreviousAssignmentTable } from "src/sections/student/previous-assignment-table";
 import { applyPagination } from "src/utils/apply-pagination";
-import { clerkClient } from "@clerk/nextjs";
-import prisma from "../lib/prisma";
 import { AssignmentSearch } from "src/sections/student/assignment-history-search";
 
 const now = new Date();
@@ -177,10 +175,6 @@ const useStudentIds = (students) => {
 	}, [students]);
 };
 
-const fetchUsers = async () => {
-	const users = await clerkClient.users.getUserList();
-	return users;
-};
 
 const Page = (props) => {
 	const [data, setData] = useState(() =>
@@ -260,8 +254,24 @@ const Page = (props) => {
 Page.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
 
 export const getStaticProps = async () => {
-	const students = await prisma.eval_students.findMany();
-	console.log(students);
+	// Dummy students data for history
+	const students = [
+		{
+			id: 1,
+			firstName: "John",
+			lastName: "Doe",
+		},
+		{
+			id: 2,
+			firstName: "Jane",
+			lastName: "Smith",
+		},
+		{
+			id: 3,
+			firstName: "Mike",
+			lastName: "Johnson",
+		},
+	];
 
 	return {
 		props: {

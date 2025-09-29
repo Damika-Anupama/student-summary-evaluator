@@ -1,62 +1,68 @@
-import { PrismaClient } from "@prisma/client";
+// Dummy API for assignments
+export default function handler(req, res) {
+	if (req.method === 'GET') {
+		// Return dummy assignments data
+		const dummyAssignments = [
+			{
+				id: 1,
+				question: "Write a summary about Climate Change",
+				description: "Summarize the main points about climate change and its effects on the environment",
+				createdBy_id: 1,
+				created_at: "2025-09-15T10:00:00.000Z",
+				eval_text: {
+					id: 1,
+					title: "Climate Change Article",
+					text: "Climate change refers to long-term shifts in temperatures and weather patterns. These shifts may be natural, but since the 1800s, human activities have been the main driver of climate change.",
+				},
+			},
+			{
+				id: 2,
+				question: "Summarize the Water Cycle",
+				description: "Explain the water cycle process in your own words",
+				createdBy_id: 1,
+				created_at: "2025-09-16T10:00:00.000Z",
+				eval_text: {
+					id: 2,
+					title: "The Water Cycle",
+					text: "The water cycle describes how water evaporates from the surface of the earth, rises into the atmosphere, cools and condenses into clouds, and falls back to the surface as precipitation.",
+				},
+			},
+			{
+				id: 3,
+				question: "Explain Photosynthesis",
+				description: "Describe how plants make their food through photosynthesis",
+				createdBy_id: 1,
+				created_at: "2025-09-17T10:00:00.000Z",
+				eval_text: {
+					id: 3,
+					title: "Photosynthesis Process",
+					text: "Photosynthesis is the process by which green plants use sunlight, water, and carbon dioxide to create oxygen and energy in the form of sugar.",
+				},
+			},
+			{
+				id: 4,
+				question: "The Solar System Summary",
+				description: "Write about the planets in our solar system and their characteristics",
+				createdBy_id: 1,
+				created_at: "2025-09-18T10:00:00.000Z",
+				eval_text: {
+					id: 4,
+					title: "Our Solar System",
+					text: "The Solar System consists of the Sun and everything that orbits around it, including eight planets, their moons, dwarf planets, asteroids, and comets.",
+				},
+			},
+		];
 
-const prisma = new PrismaClient();
-
-const jsonParser = (data) => {
-	return JSON.parse(
-		JSON.stringify(data, (key, value) =>
-			typeof value === "bigint" ? value.toString() : value
-		)
-	);
-};
-
-export default async function handler(req, res) {
-	if (req.method === "GET") {
-		try {
-			const assignments = await prisma.eval_assignments.findMany({
-				include: {
-					eval_text: true,
-				},
-			});
-			res.status(200).json({ assignments: jsonParser(assignments) });
-		} catch (err) {
-			console.log(err);
-			res.status(500).json({ error: "failed to load data" });
-		}
-	} else if (req.method === "POST") {
-		try {
-			const text = await prisma.eval_text.create({
-				data: {
-					title: req.body.title,
-					text: req.body.text,
-				},
-			});
-			const assignment = await prisma.eval_assignments.create({
-				data: {
-					question: req.body.question,
-					deadline: req.body.deadline,
-					createdBy_id: req.body.user_id,
-					textTitle_id: text.id,
-				},
-			});
-			res
-				.status(200)
-				.json({ assignment: jsonParser(assignment), text: jsonParser(text) });
-		} catch (err) {
-			console.log(err);
-			res.status(500).json({ error: "failed to load data" });
-		}
-	} else if (req.method == "DELETE") {
-		try {
-			const assignment = await prisma.eval_assignments.delete({
-				where: {
-					id: req.body.id,
-				},
-			});
-			res.status(200).json({ assignment: jsonParser(assignment) });
-		} catch (err) {
-			console.log(err);
-			res.status(500).json({ error: "failed to load data" });
-		}
+		res.status(200).json({ assignments: dummyAssignments });
+	} else if (req.method === 'POST') {
+		// Handle POST request (create new assignment)
+		const newAssignment = {
+			id: Date.now(),
+			...req.body,
+			created_at: new Date().toISOString(),
+		};
+		res.status(201).json({ assignment: newAssignment });
+	} else {
+		res.status(405).json({ error: 'Method not allowed' });
 	}
 }

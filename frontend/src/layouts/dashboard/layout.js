@@ -30,16 +30,24 @@ export const Layout = (props) => {
 	const [userName, setUserName] = useState("");
 
 	useEffect(() => {
-		if (typeof window !== "undefined" && window.localStorage) {
-			const user = JSON.parse(localStorage.getItem("user_data"));
-			if (user.username == "teacher") {
-				setIsStudent(false);
-			} else {
-				setIsStudent(true);
-			}
-			setUserName(user.firstName + " " + user.lastName);
+		// Check localStorage for saved role, or determine from pathname
+		const savedRole = localStorage.getItem("userRole");
+		if (savedRole) {
+			setIsStudent(savedRole === "student");
+		} else {
+			// Determine role from pathname
+			const isStudentPath = pathname.includes("-student");
+			setIsStudent(isStudentPath);
 		}
-	}, []);
+		setUserName("Demo User");
+	}, [pathname]);
+
+	const handleRoleToggle = () => {
+		const newRole = !isStudent;
+		setIsStudent(newRole);
+		// Save to localStorage
+		localStorage.setItem("userRole", newRole ? "student" : "teacher");
+	};
 
 	const handlePathnameChange = useCallback(() => {
 		if (openNav) {
@@ -63,6 +71,7 @@ export const Layout = (props) => {
 				open={openNav}
 				isStudent={isStudent}
 				userName={userName}
+				onRoleToggle={handleRoleToggle}
 			/>
 			<LayoutRoot>
 				<LayoutContainer>{children}</LayoutContainer>

@@ -15,7 +15,6 @@ import {
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { usePopover } from "src/hooks/use-popover";
-import { UserButton } from "@clerk/nextjs";
 
 const SIDE_NAV_WIDTH = 280;
 const TOP_NAV_HEIGHT = 64;
@@ -87,7 +86,13 @@ export const TopNav = (props) => {
 								</Badge>
 							</IconButton>
 						</Tooltip>
-						<UserButton afterSignOutUrl="/" />
+						<Avatar
+							sx={{
+								cursor: "pointer",
+								height: 40,
+								width: 40,
+							}}
+						/>
 					</Stack>
 				</Stack>
 			</Box>

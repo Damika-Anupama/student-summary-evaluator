@@ -57,6 +57,7 @@ export const SideNav = (props) => {
 						<Logo />
 					</Box>
 					<Box
+						onClick={props.onRoleToggle}
 						sx={{
 							alignItems: "center",
 							backgroundColor: "rgba(255, 255, 255, 0.04)",

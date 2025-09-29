@@ -16,18 +16,11 @@ import { TotalStudents } from "src/sections/overview/overview-total-students";
 import { TotalStudentsEnrolled } from "src/sections/overview/overview-students-enrolled";
 import { OverallScore } from "src/sections/overview/overview-total-score";
 
-import { clerkClient } from "@clerk/nextjs";
-import { getAuth, buildClerkProps } from "@clerk/nextjs/server";
-
 import { useEffect, useState } from "react";
-import { PrismaClient } from "@prisma/client";
-
 import axios from "axios";
 import { Page as StudentPage } from "src/pages/dashboard-student";
 
 const now = new Date();
-
-const prisma = new PrismaClient();
 
 const taskProgress = (data, enrolledStudents) => {
 	let complete = 0;
@@ -108,12 +101,9 @@ const Page = (props) => {
 	const [studentcompleted, setStudentcompleted] = useState(0);
 	//const[assignment,setAssignment] = useState("")
 
-	const { __clerk_ssr_state, assignments, contentValues } = props;
+	const { assignments, contentValues, userType } = props;
 
 	useEffect(() => {
-		if (typeof window !== "undefined" && window.localStorage) {
-			localStorage.setItem("user_data", JSON.stringify(__clerk_ssr_state.user));
-		}
 		const fetchStudentCount = async () => {
 			try {
 				const res = await axios.get("/api/dashboard/students/");
@@ -347,39 +337,50 @@ const Page = (props) => {
 
 	const StudentDashboard = <StudentPage />;
 
-	if (__clerk_ssr_state.user.username != "teacher") {
-		return StudentDashboard;
-	} else {
-		return TeacherDashboard;
-	}
+	// Default to teacher dashboard for now (no auth)
+	return TeacherDashboard;
 };
 
 Page.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
 
 export const getServerSideProps = async (ctx) => {
-	const { userId } = getAuth(ctx.req);
-
-	const user = userId ? await clerkClient.users.getUser(userId) : undefined;
-	//const userId = 1
-	const assignments = await prisma.eval_assignments.findMany({
-		where: {
+	// Dummy assignments data for demo
+	const assignments = [
+		{
+			id: 1,
+			question: "Write a summary about Climate Change",
+			description: "Summarize the main points about climate change and its effects",
 			createdBy_id: 1,
+			created_at: new Date(),
 		},
-	});
+		{
+			id: 2,
+			question: "Summarize the Water Cycle",
+			description: "Explain the water cycle in your own words",
+			createdBy_id: 1,
+			created_at: new Date(),
+		},
+		{
+			id: 3,
+			question: "Explain Photosynthesis",
+			description: "Describe how plants make their food",
+			createdBy_id: 1,
+			created_at: new Date(),
+		},
+		{
+			id: 4,
+			question: "The Solar System Summary",
+			description: "Write about planets in our solar system",
+			createdBy_id: 1,
+			created_at: new Date(),
+		},
+	];
 
 	return {
 		props: {
-			...buildClerkProps(ctx.req, { user }),
-			assignments: JSON.parse(
-				JSON.stringify(assignments, (key, value) =>
-					typeof value === "bigint" ? value.toString() : value
-				)
-			),
-			contentValues: JSON.parse(
-				JSON.stringify(assignments, (key, value) =>
-					typeof value === "bigint" ? value.toString() : value
-				)
-			),
+			userType: "teacher",
+			assignments: JSON.parse(JSON.stringify(assignments)),
+			contentValues: JSON.parse(JSON.stringify(assignments)),
 		},
 	};
 };
