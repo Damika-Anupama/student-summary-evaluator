@@ -1,68 +1,52 @@
-// Dummy API for assignments
-export default function handler(req, res) {
-	if (req.method === 'GET') {
-		// Return dummy assignments data
-		const dummyAssignments = [
-			{
-				id: 1,
-				question: "Write a summary about Climate Change",
-				description: "Summarize the main points about climate change and its effects on the environment",
-				createdBy_id: 1,
-				created_at: "2025-09-15T10:00:00.000Z",
-				eval_text: {
-					id: 1,
-					title: "Climate Change Article",
-					text: "Climate change refers to long-term shifts in temperatures and weather patterns. These shifts may be natural, but since the 1800s, human activities have been the main driver of climate change.",
-				},
-			},
-			{
-				id: 2,
-				question: "Summarize the Water Cycle",
-				description: "Explain the water cycle process in your own words",
-				createdBy_id: 1,
-				created_at: "2025-09-16T10:00:00.000Z",
-				eval_text: {
-					id: 2,
-					title: "The Water Cycle",
-					text: "The water cycle describes how water evaporates from the surface of the earth, rises into the atmosphere, cools and condenses into clouds, and falls back to the surface as precipitation.",
-				},
-			},
-			{
-				id: 3,
-				question: "Explain Photosynthesis",
-				description: "Describe how plants make their food through photosynthesis",
-				createdBy_id: 1,
-				created_at: "2025-09-17T10:00:00.000Z",
-				eval_text: {
-					id: 3,
-					title: "Photosynthesis Process",
-					text: "Photosynthesis is the process by which green plants use sunlight, water, and carbon dioxide to create oxygen and energy in the form of sugar.",
-				},
-			},
-			{
-				id: 4,
-				question: "The Solar System Summary",
-				description: "Write about the planets in our solar system and their characteristics",
-				createdBy_id: 1,
-				created_at: "2025-09-18T10:00:00.000Z",
-				eval_text: {
-					id: 4,
-					title: "Our Solar System",
-					text: "The Solar System consists of the Sun and everything that orbits around it, including eight planets, their moons, dwarf planets, asteroids, and comets.",
-				},
-			},
-		];
+import { API_ENDPOINTS } from '../../../config';
 
-		res.status(200).json({ assignments: dummyAssignments });
-	} else if (req.method === 'POST') {
-		// Handle POST request (create new assignment)
-		const newAssignment = {
-			id: Date.now(),
-			...req.body,
-			created_at: new Date().toISOString(),
-		};
-		res.status(201).json({ assignment: newAssignment });
-	} else {
-		res.status(405).json({ error: 'Method not allowed' });
+// Proxy API for assignments - connects to Django backend
+export default async function handler(req, res) {
+	const backendUrl = API_ENDPOINTS.assignments;
+
+	try {
+		if (req.method === 'GET') {
+			// Fetch assignments from Django backend
+			const response = await fetch(backendUrl);
+			const assignments = await response.json();
+
+			// Fetch text data for each assignment
+			const assignmentsWithText = await Promise.all(
+				assignments.map(async (assignment) => {
+					const textResponse = await fetch(`${API_ENDPOINTS.text}${assignment.textTitle}/`);
+					const textData = await textResponse.json();
+					return {
+						id: assignment.id,
+						question: assignment.question,
+						description: assignment.question, // Using question as description
+						createdBy_id: assignment.createdBy,
+						created_at: assignment.deadline, // Using deadline as created_at
+						eval_text: {
+							id: textData.id,
+							title: textData.title,
+							text: textData.text,
+						},
+					};
+				})
+			);
+
+			res.status(200).json({ assignments: assignmentsWithText });
+		} else if (req.method === 'POST') {
+			// Forward POST request to Django backend
+			const response = await fetch(backendUrl, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(req.body),
+			});
+			const data = await response.json();
+			res.status(response.status).json(data);
+		} else {
+			res.status(405).json({ error: 'Method not allowed' });
+		}
+	} catch (error) {
+		console.error('Error fetching assignments:', error);
+		res.status(500).json({ error: 'Failed to fetch assignments' });
 	}
 }
