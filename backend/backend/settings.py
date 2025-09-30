@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+import dj_database_url
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,12 +22,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-%9m$k!d!!%f3g&^!h4%74l4^l%kujo$-)x5rcope&dq6h-w!=j'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-%9m$k!d!!%f3g&^!h4%74l4^l%kujo$-)x5rcope&dq6h-w!=j')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ["localhost"]
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -81,17 +83,20 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'dse-project-db',
-        'HOST': 'dse-project-db.cfge0rpojokv.eu-north-1.rds.amazonaws.com',
-        'USER': 'admin',
-        'PASSWORD': 'DSE_Project_UOM',
-    }
+    'default': dj_database_url.config(
+        default='postgresql://localhost/student_summary_db',
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
 
 
-CORS_ORIGIN_WHITELIST = ["http://localhost:3000"]
+# CORS settings
+CORS_ALLOWED_ORIGINS = os.environ.get(
+    'CORS_ALLOWED_ORIGINS',
+    'http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:3003'
+).split(',')
+CORS_ALLOW_CREDENTIALS = True
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -137,9 +142,9 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR.parent, 'frontend/build/static'),
-]
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR.parent, 'frontend/build/static'),
+# ]
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 

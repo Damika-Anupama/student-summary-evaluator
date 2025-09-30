@@ -1,7 +1,35 @@
 .vscode
-# __pycache__/
-# backend/backend/__pycache__/
-# backend/eval/__pycache__/
-# backend/eval/migrations/__pycache__/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
 
+# Django
+*.log
+*.pot
+db.sqlite3
+media/
+staticfiles/
+
+# Environment variables
+.env
+*.env
+
+# Frontend
 /frontend/package-lock.json
+/frontend/.next
+/frontend/node_modules
+
+# Docker
+docker-compose.override.yml
+
+# IDEs
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

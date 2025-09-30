@@ -19,6 +19,7 @@ class Students(models.Model):
 
 
 class Text(models.Model):
+    prompt_id = models.CharField(max_length=10, null=True, blank=True)
     title = models.CharField(max_length=20)
     # question = models.CharField(max_length=100)
     text = models.TextField()

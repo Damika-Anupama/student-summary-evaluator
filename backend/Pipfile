@@ -4,14 +4,34 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+django = "*"
 djangorestframework = "*"
-mysqlclient = "*"
 django-cors-headers = "*"
-gunicorn = "==20.1.0"
-whitenoise = "==6.4.0"
+gunicorn = "*"
+whitenoise = "*"
 pipfile = "*"
+numpy = "*"
+pandas = "*"
+transformers = "*"
+datasets = "*"
+torch = "*"
+scikit-learn = "*"
+evaluate = "*"
+nltk = "*"
+tqdm = "*"
+spacy = "*"
+autocorrect = "*"
+pyspellchecker = "*"
+inexactsearch = "*"
+spellchecker = "*"
+accelerate = "*"
+huggingface-hub = "*"
+lightgbm = "*"
+psycopg2-binary = "*"
+dj-database-url = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.11"
+python_version = "3.13"

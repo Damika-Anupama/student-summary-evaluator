@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from .models import Text, Summaries
+from .models import Text, Summaries, Assignments, Students, Teachers
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -11,7 +11,7 @@ from backend.model import get_content_and_wording
 
 # from rest_framework.response import Response
 # from rest_framework.decorators import api_view
-from .serializers import TextSerializer, SummariesSerializer
+from .serializers import TextSerializer, SummariesSerializer, AssignmentsSerializer, StudentsSerializer, TeachersSerializer
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 
@@ -26,6 +26,21 @@ class TextView(viewsets.ModelViewSet):
 class SummariesView(viewsets.ModelViewSet):
     queryset = Summaries.objects.all()
     serializer_class = SummariesSerializer
+
+
+class AssignmentsView(viewsets.ModelViewSet):
+    queryset = Assignments.objects.all()
+    serializer_class = AssignmentsSerializer
+
+
+class StudentsView(viewsets.ModelViewSet):
+    queryset = Students.objects.all()
+    serializer_class = StudentsSerializer
+
+
+class TeachersView(viewsets.ModelViewSet):
+    queryset = Teachers.objects.all()
+    serializer_class = TeachersSerializer
 
 
 input_summary = ""

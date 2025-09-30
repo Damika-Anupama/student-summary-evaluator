@@ -17,7 +17,11 @@ from transformers import (
 from transformers import DataCollatorWithPadding
 from datasets import Dataset, load_dataset, load_from_disk
 from transformers import TrainingArguments, Trainer
-from datasets import load_metric, disable_progress_bar
+try:
+    from datasets import load_metric, disable_progress_bar
+except ImportError:
+    from evaluate import load as load_metric
+    disable_progress_bar = lambda: None
 from sklearn.metrics import mean_squared_error
 import torch
 from sklearn.model_selection import KFold, GroupKFold
