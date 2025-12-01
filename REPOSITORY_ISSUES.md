@@ -1,0 +1,30 @@
+# Repository Audit: Key Issues and Recommendations
+
+## Backend (Django)
+- **Hard-coded secrets and permissive defaults**: The settings file ships with a development secret key, enables debug by default, and allows localhost hosts. These values risk leaking in production; load required secrets from the environment, default `DEBUG` to `False`, and fail fast when variables are missing.【F:backend/backend/settings.py†L24-L31】
+- **Middleware ordering and duplication**: `CommonMiddleware` appears twice and `CorsMiddleware`/`WhiteNoiseMiddleware` are placed after it, which can lead to unexpected caching/CORS behavior. Remove the duplicate and follow Django/WhiteNoise ordering (Security → WhiteNoise → Session → Common → CSRF, etc.).【F:backend/backend/settings.py†L48-L59】
+- **Inconsistent model dunder methods**: Several models implement `__int__` instead of `__str__`, so admin and serializers will render object IDs rather than human-friendly values. Replace with `__str__` returning meaningful labels for Teachers, Students, Assignments, and Summaries.【F:backend/eval/models.py†L5-L60】
+- **Loose foreign key nullability**: Assignment and summary relationships are nullable even though they are functionally required (`null=True` on `question` and `student`). Enforce non-null constraints and add `on_delete` behaviors to avoid orphaned data.【F:backend/eval/models.py†L32-L49】
+- **Unsafe evaluation endpoint**: `SummaryView` relies on global mutable state, hard-coded prompt mappings, and trusts client-provided IDs. Refactor to per-request variables, validate payloads/ownership, and fetch prompt IDs from the database rather than the `id_dict` constant to avoid race conditions and mismatches.【F:backend/eval/views.py†L46-L78】
+- **Missing API routing for app URLs**: `eval/urls.py` is effectively empty, forcing everything through the project `urls.py` and complicating namespacing. Define app-level routes (including `SummaryView`) and include them from the project router for clearer separation and reversibility.【F:backend/eval/urls.py†L1-L6】【F:backend/backend/urls.py†L3-L17】
+- **Absent validation/permissions**: ViewSets expose all CRUD operations without authentication, throttling, or serializer validation hooks, which is risky for student data. Add DRF authentication/permissions, serializer `validate_*` methods, and pagination/ordering as appropriate.【F:backend/eval/views.py†L21-L44】【F:backend/eval/serializers.py†L5-L28】
+- **Database URL fallback**: The database configuration defaults to a local Postgres instance; in production, missing `DATABASE_URL` will silently connect to local DB. Require `DATABASE_URL` via environment (or raise) and consider separate test settings.【F:backend/backend/settings.py†L85-L91】
+
+## Frontend (Next.js / React)
+- **Client-only API paths**: Dashboard data fetches call relative `/api/dashboard/*` endpoints without configuring the base URL or error recovery, which will fail when the Next.js app is hosted separately from the Django API. Centralize API URLs via `config.js`, add axios interceptors/error boundaries, and prefer `getServerSideProps` or data hooks with loading states.【F:frontend/src/pages/index.js†L104-L160】【F:frontend/src/config.js†L1-L11】
+- **Derived data calculations lack guards**: Functions such as `taskProgress` and `calculate` assume array contents and log to console; invalid data can yield `NaN` or negative percentages. Add type checks, default values, and unit tests for these helpers instead of silent console logging.【F:frontend/src/pages/index.js†L25-L91】
+- **UI accessibility/UX gaps**: Form controls on the dashboard lack `id`/`aria` wiring and show no loading or error states while fetching students/summaries. Provide accessible labels, skeletons/spinners, and user-facing error messages to align with UX best practices.【F:frontend/src/pages/index.js†L171-L200】
+- **Dependency/license hygiene**: The package metadata still references "material-kit-react" and Devias licensing while the project is custom. Update `package.json` name/license/homepage to match the actual product and ensure dependency versions (Next 15 + React 19) are vetted for compatibility.【F:frontend/package.json†L1-L46】
+
+## Infrastructure / Operations
+- **Plaintext database credentials**: `docker-compose.yml` checks in default `postgres` credentials, which encourages reuse in non-dev environments. Move credentials to an `.env` file, reference via `env_file`, and use non-default passwords per environment.【F:docker-compose.yml†L4-L18】
+- **Environment documentation drift**: README lists Python 3.13 + Pipenv but the repo also includes `requirements.txt` and a `Pipfile.lock`; ensure a single, tested dependency management flow (documented commands and matching versions) to avoid setup confusion.【F:README.md†L17-L70】【F:backend/requirements.txt†L1-L200】
+- **Static build coupling**: Django `TEMPLATES` references `frontend/build`, suggesting a bundled SPA, while the frontend is a standalone Next.js app. Clarify deployment architecture (separate services vs. Django serving static export) and adjust STATICFILES/WhiteNoise config accordingly to avoid broken assets.【F:backend/backend/settings.py†L63-L148】【F:frontend/package.json†L8-L16】
+
+## Testing & Quality
+- **Missing automated tests and linting hooks**: The backend `tests.py` is empty and there are no CI configs to run unit tests, linters, or type checks across backend/frontend. Add pytest/Django tests, DRF API tests, React component tests, and CI workflows (GitHub Actions) to enforce quality gates.【F:backend/eval/tests.py†L1-L3】【F:frontend/package.json†L7-L16】
+- **Data seeding and migrations**: Seed scripts are mentioned in README but not versioned or validated; ensure migrations align with model changes (e.g., nullability fixes) and provide idempotent seed commands guarded behind environment checks.【F:README.md†L31-L80】【F:backend/eval/models.py†L31-L49】
+
+---
+
+Addressing the above will harden security, improve reliability, and align the codebase with Django/Next.js best practices.
