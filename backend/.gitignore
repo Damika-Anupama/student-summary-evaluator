@@ -1,2 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+/staticfiles/
+
+# Environments
+.env
+.venv
+env/
+venv/
+
+# Project-specific
 /model
 /installs
+
+# Pipenv (a single, documented dependency flow is preferred; see README)
