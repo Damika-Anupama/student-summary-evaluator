@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://student-summary-evaluator.vercel.app/sitemap.xml

@@ -1,0 +1,40 @@
+.vscode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Django
+*.log
+*.pot
+db.sqlite3
+media/
+staticfiles/
+
+# Environment variables
+.env
+*.env
+
+# Node / Next (app now at repo root)
+/node_modules
+/.next
+
+# Docker
+docker-compose.override.yml
+
+# IDEs
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+.gstack/
+
+# gstack (local tooling, not committed to this project)
+.claude/
+CLAUDE.md
+.vercel
